@@ -1,13 +1,17 @@
+using EcommerceApi.Context;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-//builder.Services.AddDbContext<ShiftsLoggerContext>(options =>
-//        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-//        .UseAsyncSeeding(async (context, _, CancellationToken) =>
-//        {
-//            await DatabaseSeeding.CustomSeeding((ShiftsLoggerContext)context);
-//        })
-//    );
+builder.Services.AddDbContext<EcommerceDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
+        .UseAsyncSeeding(async (context, _, CancellationToken) =>
+        {
+            // TODO generate seeding later
+            //await DatabaseSeeding.CustomSeeding((EcommerceDbContext)context);
+        })
+    );
 
 builder.Services.AddOpenApi();
 

@@ -7,5 +7,5 @@ public class Product
     public decimal Price { get; set; }
     public int CategoryId { get; set; }
     public Category Category { get; set; } = null!;
-    public ICollection<Sale> Sales { get; set; } = [];
+    public ICollection<SaleItem> SaleItems { get; set; } = [];
 }
