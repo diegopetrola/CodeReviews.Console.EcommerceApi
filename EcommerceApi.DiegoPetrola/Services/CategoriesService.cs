@@ -27,14 +27,14 @@ public class CategoriesService(EcommerceDbContext context)
         return Result<CategoryDto>.Ok(dto);
     }
 
-    public async Task<Result<CategoryDto>> SoftDeleteCategory(int id)
+    public async Task<Result<CategoryDto?>> SoftDeleteCategory(int id)
     {
         var category = await context.Categories.FindAsync(id);
         if (category is null)
-            return Result<CategoryDto>.NotFound("Record not found.");
+            return Result<CategoryDto?>.NotFound("Record not found.");
         category.IsDeleted = true;
         await context.SaveChangesAsync();
-        return Result<CategoryDto>.Ok(null!);
+        return Result<CategoryDto?>.Ok(null);
     }
 
     public async Task<Result<CategoryDto>> CreateCategory(CreateCategoryDto dto)

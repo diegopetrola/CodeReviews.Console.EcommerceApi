@@ -14,6 +14,7 @@ builder.Services.AddDbContext<EcommerceDbContext>(options =>
     );
 builder.Services.AddScoped<CategoriesService>();
 builder.Services.AddScoped<ProductsService>();
+builder.Services.AddScoped<SalesService>();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();

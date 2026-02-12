@@ -55,14 +55,14 @@ public class ProductsService(EcommerceDbContext context)
         return Result<ProductDto>.Ok(newDto);
     }
 
-    public async Task<Result<ProductDto>> SoftDeleteProduct(int id)
+    public async Task<Result<ProductDto?>> SoftDeleteProduct(int id)
     {
         var product = await context.Products.FindAsync(id);
         if (product is null)
-            return Result<ProductDto>.NotFound("Product not found");
+            return Result<ProductDto?>.NotFound("Product not found");
 
         product.IsDeleted = true;
         await context.SaveChangesAsync();
-        return Result<ProductDto>.Ok(null);
+        return Result<ProductDto?>.Ok(null);
     }
 }

@@ -1,62 +1,45 @@
-﻿using EcommerceApi.Context;
-using EcommerceApi.Models;
-using EcommerceApi.Models.DTOs;
+﻿using EcommerceApi.Models.DTOs;
+using EcommerceApi.Results;
+using EcommerceApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class SalesController(EcommerceDbContext context) : ControllerBase
+public class SalesController(SalesService service) : ControllerBase
 {
     [HttpGet("{id}")]
     public async Task<ActionResult<SaleDto>> GetSale(int id)
     {
-        var sale = await context.Sales
-            .Include(s => s.SaleItems)
-            .ThenInclude(si => si.Product)
-            .FirstOrDefaultAsync(s => s.Id == id);
+        var res = await service.GetSale(id);
+        return MapToStatusCode(res);
+    }
 
-        if (sale is null) return NotFound();
-
-        var dto = new SaleDto(
-            sale.Id,
-            sale.SaleDate,
-            [.. sale.SaleItems.Select(si => new SaleItemDto(
-                si.ProductId,
-                si.Product.Name,
-                si.Quantity,
-                si.Product.Price))],
-            sale.SaleItems.Sum(si => si.Quantity * si.Product.Price)
-        );
-
-        return Ok(dto);
+    [HttpGet("page/{page}")]
+    public async Task<ActionResult<List<SaleDto>>> GetSalePage(int page)
+    {
+        var res = await service.GetSalesByPage(page);
+        return MapToStatusCode(res);
     }
 
     [HttpPost]
     public async Task<ActionResult<SaleDto>> CreateSale(CreateSaleDto dto)
     {
-        if (dto.Items == null || dto.Items.Count == 0)
-            return BadRequest("Sale must contain at least one item.");
+        var res = await service.CreateSale(dto);
+        return MapToStatusCode(res);
+    }
 
-        var sale = new Sale { SaleDate = DateTime.UtcNow };
+    private ActionResult MapToStatusCode<T>(Result<T> res)
+    {
+        if (res.IsSuccess)
+            return Ok(res.Value);
 
-        foreach (var item in dto.Items)
+        return res.Error.ErrorType switch
         {
-            var product = await context.Products.FindAsync(item.ProductId);
-            if (product == null) return BadRequest($"Product {item.ProductId} not found.");
-
-            sale.SaleItems.Add(new SaleItem
-            {
-                ProductId = item.ProductId,
-                Quantity = item.Quantity
-            });
-        }
-
-        context.Sales.Add(sale);
-        await context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetSale), new { id = sale.Id }, sale.Id);
+            ErrorType.NotFound => NotFound(res.Error.Error),
+            ErrorType.Invalid => BadRequest(res.Error.Error),
+            _ => Problem(res.Error.Error)
+        };
     }
 }
