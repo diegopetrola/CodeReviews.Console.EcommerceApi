@@ -6,6 +6,7 @@ public class Product
     public string Name { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int CategoryId { get; set; }
+    public bool IsDeleted { get; set; } = false;
     public Category Category { get; set; } = null!;
     public ICollection<SaleItem> SaleItems { get; set; } = [];
 }

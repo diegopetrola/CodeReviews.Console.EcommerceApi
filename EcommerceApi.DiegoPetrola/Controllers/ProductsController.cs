@@ -1,40 +1,50 @@
-﻿using EcommerceApi.Context;
-using EcommerceApi.Models;
-using EcommerceApi.Models.DTOs;
+﻿using EcommerceApi.Models.DTOs;
+using EcommerceApi.Results;
+using EcommerceApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController(EcommerceDbContext context) : ControllerBase
+public class ProductsController(ProductsService service) : ControllerBase
 {
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts()
+    [HttpGet("page/{page}")]
+    public async Task<ActionResult<List<ProductDto>>> GetProducts(int page)
     {
-        return await context.Products
-            .Include(p => p.Category)
-            .Select(p => new ProductDto(p.Id, p.Name, p.Price, p.CategoryId, p.Category.Name))
-            .ToListAsync();
+        var res = await service.GetProducts(page);
+        return Ok(res.Value);
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ProductDto>> GetProductById(int id)
+    {
+        var res = await service.GetProduct(id);
+        if (!res.IsSuccess)
+            return res.Error.ErrorType switch
+            {
+                (ErrorType.NotFound) => NotFound(res.Error.Error),
+                _ => Problem(res.Error.Error),
+            };
+
+        return Ok(res.Value);
     }
 
     [HttpPost]
     public async Task<ActionResult<ProductDto>> CreateProduct(CreateProductDto dto)
     {
-        var categoryExists = await context.Categories.AnyAsync(c => c.Id == dto.CategoryId);
-        if (!categoryExists) return BadRequest("Invalid Category ID");
+        var res = await service.CreateProduct(dto);
+        if (!res.IsSuccess)
+            return BadRequest(res.Error.Error);
+        return Ok(res.Value);
+    }
 
-        var product = new Product
-        {
-            Name = dto.Name,
-            Price = dto.Price,
-            CategoryId = dto.CategoryId
-        };
-
-        context.Products.Add(product);
-        await context.SaveChangesAsync();
-
-        return CreatedAtAction(nameof(GetProducts), new { id = product.Id }, dto);
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ProductDto>> DeleteProduct(int id)
+    {
+        var res = await service.SoftDeleteProduct(id);
+        if (!res.IsSuccess)
+            return NotFound(res.Error.Error);
+        return Ok(res.Value);
     }
 }

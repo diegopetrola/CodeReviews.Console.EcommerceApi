@@ -32,6 +32,10 @@ public class EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : 
             .HasForeignKey(si => si.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<Product>()
+            .Property(p => p.Price)
+            .HasPrecision(18, 2);
+
         modelBuilder.Entity<SaleItem>()
             .HasKey(si => new { si.SaleId, si.ProductId });
 
