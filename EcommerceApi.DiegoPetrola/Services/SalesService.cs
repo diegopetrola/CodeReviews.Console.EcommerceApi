@@ -8,26 +8,12 @@ namespace EcommerceApi.Services;
 
 public class SalesService(EcommerceDbContext context)
 {
-    private static SaleDto GetSaleDto(Sale sale)
-    {
-        return new SaleDto(
-            sale.Id,
-            sale.SaleDate,
-            [.. sale.SaleItems.Select(si => new SaleItemDto(
-                si.ProductId,
-                si.Product.Name,
-                si.Quantity,
-                si.Product.Price))],
-            sale.SaleItems.Sum(si => si.Quantity * si.Product.Price)
-        );
-    }
-
     public async Task<Result<List<SaleDto>>> GetSalesByPage(int page)
     {
         var sales = await context.Sales
             .Skip(page * 20)
             .Take(20)
-            .Select(s => GetSaleDto(s))
+            .Select(s => s.ToDto())
             .ToListAsync();
 
         return Result<List<SaleDto>>.Ok(sales);
@@ -42,8 +28,7 @@ public class SalesService(EcommerceDbContext context)
 
         if (sale is null) return Result<SaleDto>.NotFound("Sale not found");
 
-        var dto = GetSaleDto(sale);
-        return Result<SaleDto>.Ok(dto);
+        return Result<SaleDto>.Ok(sale.ToDto());
     }
 
     public async Task<Result<SaleDto>> CreateSale(CreateSaleDto dto)
@@ -68,6 +53,6 @@ public class SalesService(EcommerceDbContext context)
         context.Sales.Add(sale);
         await context.SaveChangesAsync();
 
-        return Result<SaleDto>.Ok(GetSaleDto(sale));
+        return Result<SaleDto>.Ok(sale.ToDto());
     }
 }

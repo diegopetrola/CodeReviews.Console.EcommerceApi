@@ -13,7 +13,7 @@ public class ProductsService(EcommerceDbContext context)
         var products = await context.Products
             .Skip(20 * page)
             .Take(20)
-            .Select(p => new ProductDto(p.Id, p.Name, p.Price, p.Category.Id, p.Category.Name))
+            .Select(p => p.ToDto())
             .ToListAsync();
 
         return Result<List<ProductDto>>.Ok(products);
@@ -28,8 +28,7 @@ public class ProductsService(EcommerceDbContext context)
         if (product is null)
             return Result<ProductDto>.NotFound("Product not found");
 
-        var dto = new ProductDto(product.Id, product.Name, product.Price, product.Category.Id, product.Category.Name);
-        return Result<ProductDto>.Ok(dto);
+        return Result<ProductDto>.Ok(product.ToDto());
     }
 
     public async Task<Result<ProductDto>> CreateProduct(CreateProductDto dto)
@@ -51,8 +50,7 @@ public class ProductsService(EcommerceDbContext context)
             return Result<ProductDto>.Invalid("Invalid product data or duplicate entry");
         }
 
-        var newDto = new ProductDto(product.Id, product.Name, product.Price, product.CategoryId, product.Category.Name);
-        return Result<ProductDto>.Ok(newDto);
+        return Result<ProductDto>.Ok(product.ToDto());
     }
 
     public async Task<Result<ProductDto?>> SoftDeleteProduct(int id)

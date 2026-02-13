@@ -1,5 +1,4 @@
 ﻿using EcommerceApi.Models.DTOs;
-using EcommerceApi.Results;
 using EcommerceApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,38 +12,27 @@ public class ProductsController(ProductsService service) : ControllerBase
     public async Task<ActionResult<List<ProductDto>>> GetProducts(int page)
     {
         var res = await service.GetProducts(page);
-        return Ok(res.Value);
+        return this.ToActionResult(res);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<ProductDto>> GetProductById(int id)
     {
         var res = await service.GetProduct(id);
-        if (!res.IsSuccess)
-            return res.Error.ErrorType switch
-            {
-                (ErrorType.NotFound) => NotFound(res.Error.Error),
-                _ => Problem(res.Error.Error),
-            };
-
-        return Ok(res.Value);
+        return this.ToActionResult(res);
     }
 
     [HttpPost]
     public async Task<ActionResult<ProductDto>> CreateProduct(CreateProductDto dto)
     {
         var res = await service.CreateProduct(dto);
-        if (!res.IsSuccess)
-            return BadRequest(res.Error.Error);
-        return Ok(res.Value);
+        return this.ToActionResult(res);
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult<ProductDto>> DeleteProduct(int id)
     {
         var res = await service.SoftDeleteProduct(id);
-        if (!res.IsSuccess)
-            return NotFound(res.Error.Error);
-        return Ok(res.Value);
+        return this.ToActionResult(res);
     }
 }
