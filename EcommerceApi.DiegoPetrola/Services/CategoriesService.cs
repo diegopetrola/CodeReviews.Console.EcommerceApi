@@ -50,4 +50,21 @@ public class CategoriesService(EcommerceDbContext context)
 
         return Result<CategoryDto>.Ok(category.ToDto());
     }
+
+    public async Task<Result<CategoryDto>> UpdateCategory(CategoryDto dto)
+    {
+        var category = await context.Categories.FindAsync(dto.Id);
+        if (category is null)
+            return Result<CategoryDto>.NotFound("Category not found");
+        category.Name = dto.Name;
+        try
+        {
+            await context.SaveChangesAsync();
+            return Result<CategoryDto>.Ok(category.ToDto());
+        }
+        catch
+        {
+            return Result<CategoryDto>.Invalid("Duplicated category");
+        }
+    }
 }

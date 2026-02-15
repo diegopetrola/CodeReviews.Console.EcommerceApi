@@ -37,7 +37,16 @@ public class EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : 
             .HasPrecision(18, 2);
 
         modelBuilder.Entity<SaleItem>()
+            .Property(p => p.ProductPrice)
+            .HasPrecision(18, 2);
+
+        modelBuilder.Entity<SaleItem>()
             .HasKey(si => new { si.SaleId, si.ProductId });
+
+        modelBuilder.Entity<SaleItem>()
+            .HasOne(si => si.Product)
+            .WithMany(p => p.SaleItems)
+            .IsRequired(false);
 
         modelBuilder.Entity<Category>()
             .HasIndex(c => c.Name)
@@ -45,6 +54,5 @@ public class EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : 
 
         modelBuilder.Entity<Category>().HasQueryFilter(c => !c.IsDeleted);
         modelBuilder.Entity<Product>().HasQueryFilter(p => !p.IsDeleted);
-        modelBuilder.Entity<SaleItem>().HasQueryFilter(si => !si.Product!.IsDeleted);
     }
 }

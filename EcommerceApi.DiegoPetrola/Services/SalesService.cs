@@ -11,6 +11,7 @@ public class SalesService(EcommerceDbContext context)
     public async Task<Result<List<SaleDto>>> GetSalesByPage(int page)
     {
         var sales = await context.Sales
+            .IgnoreQueryFilters()
             .Skip(page * 20)
             .Take(20)
             .Select(s => s.ToDto())
@@ -22,6 +23,7 @@ public class SalesService(EcommerceDbContext context)
     public async Task<Result<SaleDto>> GetSale(int id)
     {
         var sale = await context.Sales
+            .IgnoreQueryFilters()
             .Include(s => s.SaleItems)
             .ThenInclude(si => si.Product)
             .FirstOrDefaultAsync(s => s.Id == id);
@@ -46,13 +48,31 @@ public class SalesService(EcommerceDbContext context)
             sale.SaleItems.Add(new SaleItem
             {
                 ProductId = item.ProductId,
-                Quantity = item.Quantity
+                Quantity = item.Quantity,
+                ProductName = product.Name,
+                ProductPrice = product.Price
             });
         }
 
         context.Sales.Add(sale);
         await context.SaveChangesAsync();
-
         return Result<SaleDto>.Ok(sale.ToDto());
+    }
+
+    public async Task<Result<SaleDto>> DeleteSale(int id)
+    {
+        var sale = await context.Sales.FindAsync(id);
+        if (sale is null)
+            return Result<SaleDto>.NotFound("Sale not found");
+        try
+        {
+            sale.IsDeleted = true;
+            await context.SaveChangesAsync();
+            return Result<SaleDto>.Ok(sale.ToDto());
+        }
+        catch
+        {
+            return Result<SaleDto>.InternalServerError("Something went wrong");
+        }
     }
 }

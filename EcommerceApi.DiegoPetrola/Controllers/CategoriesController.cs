@@ -29,6 +29,15 @@ public class CategoriesController(CategoriesService service) : ControllerBase
         return this.ToActionResult(res);
     }
 
+    [HttpPut("{id}")]
+    public async Task<ActionResult> DeleteCategory(int id, CategoryDto dto)
+    {
+        if (dto.Id != id)
+            return BadRequest();
+        var res = await service.UpdateCategory(dto);
+        return this.ToActionResult(res);
+    }
+
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteCategory(int id)
     {

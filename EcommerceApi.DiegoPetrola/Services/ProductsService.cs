@@ -11,6 +11,7 @@ public class ProductsService(EcommerceDbContext context)
     public async Task<Result<List<ProductDto>>> GetProducts(int page)
     {
         var products = await context.Products
+            .Include(p => p.Category)
             .Skip(20 * page)
             .Take(20)
             .Select(p => p.ToDto())
@@ -44,6 +45,9 @@ public class ProductsService(EcommerceDbContext context)
         {
             context.Products.Add(product);
             await context.SaveChangesAsync();
+            await context.Entry(product)
+            .Reference(p => p.Category)
+            .LoadAsync();
         }
         catch (DbUpdateException)
         {

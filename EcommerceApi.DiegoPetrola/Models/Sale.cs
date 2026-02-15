@@ -6,6 +6,7 @@ public class Sale
 {
     public int Id { get; set; }
     public DateTime SaleDate { get; set; }
+    public bool IsDeleted { get; set; } = false;
     public ICollection<SaleItem> SaleItems { get; set; } = [];
     public SaleDto ToDto()
     {
@@ -13,7 +14,7 @@ public class Sale
             Id,
             SaleDate,
             [.. SaleItems.Select(si => si.ToDto())],
-            SaleItems.Sum(si => si.Quantity * si.Product.Price)
+            SaleItems.Sum(si => si.Quantity * si.ProductPrice)
         );
     }
 }

@@ -28,4 +28,11 @@ public class SalesController(SalesService service) : ControllerBase
         var res = await service.CreateSale(dto);
         return this.ToActionResult(res);
     }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<SaleDto>> DeleteSale(int id)
+    {
+        var res = await service.DeleteSale(id);
+        return this.ToActionResult(res);
+    }
 }
