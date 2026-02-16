@@ -1,6 +1,4 @@
-﻿using EcommerceApi.Models.DTOs;
-
-namespace EcommerceApi.Models;
+﻿namespace EcommerceApi.Models;
 
 public class Product
 {
@@ -11,8 +9,4 @@ public class Product
     public bool IsDeleted { get; set; } = false;
     public Category Category { get; set; } = null!;
     public ICollection<SaleItem> SaleItems { get; set; } = [];
-    public ProductDto ToDto()
-    {
-        return new ProductDto(Id, Name, Price, Category.Id, Category.Name);
-    }
 }

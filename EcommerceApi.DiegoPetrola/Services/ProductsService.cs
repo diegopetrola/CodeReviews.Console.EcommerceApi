@@ -2,6 +2,7 @@
 using EcommerceApi.Models;
 using EcommerceApi.Models.DTOs;
 using EcommerceApi.Results;
+using EcommerceApi.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApi.Services;

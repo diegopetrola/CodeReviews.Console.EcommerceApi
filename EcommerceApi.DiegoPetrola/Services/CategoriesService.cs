@@ -2,6 +2,7 @@
 using EcommerceApi.Models;
 using EcommerceApi.Models.DTOs;
 using EcommerceApi.Results;
+using EcommerceApi.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApi.Services;
@@ -25,11 +26,14 @@ public class CategoriesService(EcommerceDbContext context)
         return Result<CategoryDto>.Ok(category.ToDto());
     }
 
-    public async Task<Result<CategoryDto?>> SoftDeleteCategory(int id)
+    public async Task<Result<CategoryDto?>> DeleteCategory(int id)
     {
         var category = await context.Categories.FindAsync(id);
+        var products = await context.Products.AnyAsync(p => p.CategoryId == id);
+        if (products)
+            return Result<CategoryDto?>.Invalid("Can't delete a category that has products");
         if (category is null)
-            return Result<CategoryDto?>.NotFound("Category not found.");
+            return Result<CategoryDto?>.NotFound("Category not found");
         try
         {
             context.Remove(category);

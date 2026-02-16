@@ -30,7 +30,7 @@ public class CategoriesController(CategoriesService service) : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> DeleteCategory(int id, CategoryDto dto)
+    public async Task<ActionResult> UpdateCategory(int id, CategoryDto dto)
     {
         if (dto.Id != id)
             return BadRequest();
@@ -41,7 +41,7 @@ public class CategoriesController(CategoriesService service) : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteCategory(int id)
     {
-        var res = await service.SoftDeleteCategory(id);
+        var res = await service.DeleteCategory(id);
         return this.ToActionResult(res);
     }
 }

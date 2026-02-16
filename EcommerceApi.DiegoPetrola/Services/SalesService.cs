@@ -2,6 +2,7 @@
 using EcommerceApi.Models;
 using EcommerceApi.Models.DTOs;
 using EcommerceApi.Results;
+using EcommerceApi.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace EcommerceApi.Services;
@@ -38,11 +39,19 @@ public class SalesService(EcommerceDbContext context)
             return Result<SaleDto>.Invalid("Sale must contain at least one item.");
 
         var sale = new Sale { SaleDate = DateTime.UtcNow };
+        var productIds = dto.Items.Select(i => i.ProductId).ToList();
+        var products = await context.Products
+            .Where(p => productIds.Contains(p.Id))
+            .ToDictionaryAsync(p => p.Id);
+
+        if (products.Count < productIds.Count)
+            return Result<SaleDto>.Invalid($"Can't make sale of invalid products!");
 
         foreach (var item in dto.Items)
         {
-            var product = await context.Products.FindAsync(item.ProductId);
-            if (product == null) return Result<SaleDto>.Invalid($"Can't make sale of invalid product {item.ProductId}!");
+            products.TryGetValue(item.ProductId, out var product);
+            if (product is null)
+                return Result<SaleDto>.Invalid($"Can't make sale of invalid products!");
 
             sale.SaleItems.Add(new SaleItem
             {
