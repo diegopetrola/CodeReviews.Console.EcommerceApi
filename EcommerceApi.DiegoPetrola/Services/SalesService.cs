@@ -9,12 +9,12 @@ namespace EcommerceApi.Services;
 
 public class SalesService(EcommerceDbContext context)
 {
-    public async Task<Result<List<SaleDto>>> GetSalesByPage(int page)
+    public async Task<Result<List<SaleDto>>> GetSalesByPage(int pageNumber, int pageSize)
     {
         var sales = await context.Sales
             .Include(s => s.SaleItems)
-            .Skip(page * 20)
-            .Take(20)
+            .Skip(pageSize * pageNumber)
+            .Take(pageSize)
             .Select(s => s.ToDto())
             .ToListAsync();
 

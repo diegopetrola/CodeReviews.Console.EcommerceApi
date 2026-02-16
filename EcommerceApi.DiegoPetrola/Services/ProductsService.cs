@@ -9,12 +9,12 @@ namespace EcommerceApi.Services;
 
 public class ProductsService(EcommerceDbContext context)
 {
-    public async Task<Result<List<ProductDto>>> GetProducts(int page)
+    public async Task<Result<List<ProductDto>>> GetProducts(int pageNumber, int pageSize)
     {
         var products = await context.Products
             .Include(p => p.Category)
-            .Skip(20 * page)
-            .Take(20)
+            .Skip(pageSize * pageNumber)
+            .Take(pageSize)
             .Select(p => p.ToDto())
             .ToListAsync();
 

@@ -1,12 +1,14 @@
 ﻿using EcommerceApi.Models.DTOs;
 using EcommerceApi.Services;
+using EcommerceApi.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace EcommerceApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class SalesController(SalesService service) : ControllerBase
+public class SalesController(SalesService service, IOptions<PaginationSettings> options) : ControllerBase
 {
     [HttpGet("{id}")]
     public async Task<ActionResult<SaleDto>> GetSale(int id)
@@ -15,10 +17,11 @@ public class SalesController(SalesService service) : ControllerBase
         return this.ToActionResult(res);
     }
 
-    [HttpGet("page/{page}")]
-    public async Task<ActionResult<List<SaleDto>>> GetSalePage(int page)
+    [HttpGet()]
+    public async Task<ActionResult<List<SaleDto>>> GetSalePage([FromQuery] int? pageSize, [FromQuery] int pageNumber = 0)
     {
-        var res = await service.GetSalesByPage(page);
+        int finalSize = Math.Min(pageSize ?? options.Value.DefaultPageSize, options.Value.MaxPageSize);
+        var res = await service.GetSalesByPage(pageNumber, finalSize);
         return this.ToActionResult(res);
     }
 

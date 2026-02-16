@@ -1,17 +1,20 @@
 ﻿using EcommerceApi.Models.DTOs;
 using EcommerceApi.Services;
+using EcommerceApi.Utils;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace EcommerceApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController(ProductsService service) : ControllerBase
+public class ProductsController(ProductsService service, IOptions<PaginationSettings> options) : ControllerBase
 {
-    [HttpGet("page/{page}")]
-    public async Task<ActionResult<List<ProductDto>>> GetProducts(int page)
+    [HttpGet]
+    public async Task<ActionResult<List<ProductDto>>> GetProducts([FromQuery] int? pageSize, [FromQuery] int pageNumber = 0)
     {
-        var res = await service.GetProducts(page);
+        int finalSize = Math.Min(pageSize ?? options.Value.DefaultPageSize, options.Value.MaxPageSize);
+        var res = await service.GetProducts(pageNumber, finalSize);
         return this.ToActionResult(res);
     }
 
