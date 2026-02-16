@@ -35,4 +35,13 @@ public class ProductsController(ProductsService service) : ControllerBase
         var res = await service.SoftDeleteProduct(id);
         return this.ToActionResult(res);
     }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ProductDto>> UpdateProduct(int id, ProductDto dto)
+    {
+        if (id != dto.Id)
+            return BadRequest();
+        var res = await service.UpdateProduct(dto);
+        return this.ToActionResult(res);
+    }
 }

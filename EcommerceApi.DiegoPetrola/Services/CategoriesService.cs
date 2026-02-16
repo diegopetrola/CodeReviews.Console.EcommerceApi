@@ -30,9 +30,16 @@ public class CategoriesService(EcommerceDbContext context)
         var category = await context.Categories.FindAsync(id);
         if (category is null)
             return Result<CategoryDto?>.NotFound("Category not found.");
-        category.IsDeleted = true;
-        await context.SaveChangesAsync();
-        return Result<CategoryDto?>.Ok(null);
+        try
+        {
+            context.Remove(category);
+            await context.SaveChangesAsync();
+            return Result<CategoryDto?>.Ok(null);
+        }
+        catch
+        {
+            return Result<CategoryDto?>.InternalServerError("Problem on the server");
+        }
     }
 
     public async Task<Result<CategoryDto>> CreateCategory(CreateCategoryDto dto)

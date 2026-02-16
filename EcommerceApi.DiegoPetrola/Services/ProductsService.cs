@@ -49,11 +49,32 @@ public class ProductsService(EcommerceDbContext context)
             .Reference(p => p.Category)
             .LoadAsync();
         }
-        catch (DbUpdateException)
+        catch
         {
             return Result<ProductDto>.Invalid("Invalid product data or duplicate entry");
         }
+        return Result<ProductDto>.Ok(product.ToDto());
+    }
 
+    public async Task<Result<ProductDto>> UpdateProduct(ProductDto dto)
+    {
+        var product = await context.Products.FindAsync(dto.Id);
+
+        if (product is null)
+            return Result<ProductDto>.NotFound("Product not found");
+
+        try
+        {
+            product.CategoryId = dto.CategoryId;
+            product.Name = dto.Name;
+
+            await context.SaveChangesAsync();
+            await context.Entry(product).Reference(p => p.Category).LoadAsync();
+        }
+        catch
+        {
+            return Result<ProductDto>.Invalid("Something went wrong");
+        }
         return Result<ProductDto>.Ok(product.ToDto());
     }
 
@@ -63,8 +84,15 @@ public class ProductsService(EcommerceDbContext context)
         if (product is null)
             return Result<ProductDto?>.NotFound("Product not found");
 
-        product.IsDeleted = true;
-        await context.SaveChangesAsync();
-        return Result<ProductDto?>.Ok(null);
+        try
+        {
+            product.IsDeleted = true;
+            await context.SaveChangesAsync();
+            return Result<ProductDto?>.Ok(null);
+        }
+        catch
+        {
+            return Result<ProductDto?>.InternalServerError("Something went wrong");
+        }
     }
 }

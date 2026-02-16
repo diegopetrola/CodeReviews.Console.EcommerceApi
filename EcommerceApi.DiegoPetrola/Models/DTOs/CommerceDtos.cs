@@ -1,6 +1,6 @@
 ﻿namespace EcommerceApi.Models.DTOs;
 
-public record CategoryDto(int Id, string Name, bool IsDeleted);
+public record CategoryDto(int Id, string Name);
 public record CreateCategoryDto(string Name);
 public record ProductDto(int Id, string Name, decimal Price, int CategoryId, string CategoryName);
 public record CreateProductDto(string Name, decimal Price, int CategoryId);

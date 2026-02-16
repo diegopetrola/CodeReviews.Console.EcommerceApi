@@ -52,7 +52,8 @@ public class EcommerceDbContext(DbContextOptions<EcommerceDbContext> options) : 
             .HasIndex(c => c.Name)
             .IsUnique();
 
-        modelBuilder.Entity<Category>().HasQueryFilter(c => !c.IsDeleted);
         modelBuilder.Entity<Product>().HasQueryFilter(p => !p.IsDeleted);
+        modelBuilder.Entity<Sale>().HasQueryFilter(s => !s.IsDeleted);
+        modelBuilder.Entity<SaleItem>().HasQueryFilter(si => !si.Sale.IsDeleted);
     }
 }
