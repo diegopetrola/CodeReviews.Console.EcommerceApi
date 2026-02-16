@@ -7,7 +7,7 @@ A RESTful API built with **ASP.NET Core** and **Entity Framework Core**, designe
 - **Product, Category and Sales Management**: Full CRUD capabilities with relationship validation.
 - **Historical Price Integrity**: Implements "snapshotting" logic to ensure past sales records remain accurate even if current product prices change.
 - **Soft Deletes**: Implements non-destructive deletion for Products, and Sales to preserve data history, **Categories** can be deleted only there are no Products using them.
-- **Pagination**: Endpoint pagination using performant `Skip`/`Take` logic.
+- **Pagination**: Endpoint pagination using performant `Skip`/`Take` logic and configurable page size via query parameters that prevent abuse or DDoS.
 - **Result Pattern**: Uses a functional `Result<T>` wrapper to handle service-layer errors gracefully without relying on expensive Exception throwing for control flow.
 
 ## Tech Stack
